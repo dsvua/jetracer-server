@@ -283,6 +283,7 @@ namespace Jetracer
                                                    const rs2_intrinsics *d_rgb_intrin,
                                                    int image_width,
                                                    int image_height,
+                                                   float min_score,
                                                    float2 *d_pos_out,
                                                    float2 *d_pos_in,
                                                    float *d_score,
@@ -331,8 +332,8 @@ namespace Jetracer
             score = d_score[idx];
             depth = d_aligned_depth[int(pos.y + 0.5) * image_width + int(pos.y + 0.5)];
 
-            if (depth > 1 && score > 1.0f)
-            // if (score > 1.0f)
+            // if (depth > 1 && score > min_score)
+            if (score > min_score)
             {
                 local_idx = atomicAdd(&warp_counter, 1);
             }
@@ -347,8 +348,8 @@ namespace Jetracer
 
             __syncthreads();
 
-            if (depth > 1 && score > 1.0f && warp_counter > 0)
-            // if (score > 1.0f && warp_counter > 0)
+            // if (depth > 1 && score > min_score && warp_counter > 0)
+            if (score > min_score && warp_counter > 0)
             {
                 //each point is 3 x double
                 deproject_pixel_to_point_double(d_points + (global_idx + local_idx) * 3,
@@ -402,6 +403,7 @@ namespace Jetracer
                                  const rs2_intrinsics *d_rgb_intrin,
                                  int image_width,
                                  int image_height,
+                                 float min_score,
                                  float2 *d_pos_out,
                                  float2 *d_pos_in,
                                  float *d_score,
@@ -426,6 +428,7 @@ namespace Jetracer
                                                                        d_rgb_intrin,
                                                                        image_width,
                                                                        image_height,
+                                                                       min_score,
                                                                        d_pos_out,
                                                                        d_pos_in,
                                                                        d_score,

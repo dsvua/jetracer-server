@@ -45,7 +45,8 @@ namespace Jetracer
     __global__ void kernel_overlay_keypoints(unsigned char *d_image,
                                              std::size_t pitch,
                                              float2 *d_pos,
-                                             unsigned int *d_aligned_depth,
+                                             float *d_score,
+                                             float min_score,
                                              const rs2_intrinsics *d_rgb_intrin,
                                              int keypoints_num)
     {
@@ -55,16 +56,39 @@ namespace Jetracer
         {
             float2 pos = d_pos[idx];
 
-            for (int x = pos.x - 1; x < pos.x + 1; x++)
+            if (d_score[idx] > min_score)
             {
-                for (int y = pos.y - 1; y < pos.y + 1; y++)
+                for (int x = pos.x - 1; x < pos.x + 1; x++)
                 {
-                    if (y < d_rgb_intrin->height && x < d_rgb_intrin->width)
+                    for (int y = pos.y - 1; y < pos.y + 1; y++)
                     {
-                        // if (d_aligned_depth[y * d_rgb_intrin->width + x] > 0.1f)
-                        d_image[y * pitch + x] = 255;
+                        if (y < d_rgb_intrin->height && x < d_rgb_intrin->width)
+                        {
+                            d_image[y * pitch + x] = 255;
+                        }
                     }
                 }
+            }
+
+        }
+    }
+
+    __global__ void kernel_overlay_canny(unsigned char *dest_image,
+                                         std::size_t dest_pitch,
+                                         unsigned char *src_image,
+                                         std::size_t src_pitch,
+                                         unsigned char *canny_image,
+                                         std::size_t canny_pitch,
+                                         int img_width,
+                                         int img_height)
+    {
+        int x = blockDim.x * blockIdx.x + threadIdx.x;
+
+        if (x < img_width)
+        {
+            for (int y = 0; y < img_height; y++)
+            {
+                dest_image[y * dest_pitch + x] = src_image[y * src_pitch + x] | canny_image[y * canny_pitch + x];
             }
         }
     }
@@ -202,20 +226,46 @@ namespace Jetracer
     void overlay_keypoints(unsigned char *d_image,
                            std::size_t pitch,
                            float2 *d_pos,
-                           unsigned int *d_aligned_depth,
-                           int keypoints_num,
+                           float *d_score,
+                           float min_score,
                            const rs2_intrinsics *d_rgb_intrin,
+                           int keypoints_num,
                            cudaStream_t stream)
     {
         dim3 threads(CUDA_WARP_SIZE);
         // int tmp_blocks = (keypoints_num % CUDA_WARP_SIZE == 0) ? keypoints_num / CUDA_WARP_SIZE : keypoints_num / CUDA_WARP_SIZE + 1;
         dim3 blocks(calc_block_size(keypoints_num, threads.x));
+
         kernel_overlay_keypoints<<<blocks, threads, 0, stream>>>(d_image,
                                                                  pitch,
                                                                  d_pos,
-                                                                 d_aligned_depth,
+                                                                 d_score,
+                                                                 min_score,
                                                                  d_rgb_intrin,
                                                                  keypoints_num);
+    }
+
+    void overlay_canny(unsigned char *dest_image,
+                       std::size_t dest_pitch,
+                       unsigned char *src_image,
+                       std::size_t src_pitch,
+                       unsigned char *canny_image,
+                       std::size_t canny_pitch,
+                       int img_width,
+                       int img_height,
+                       cudaStream_t stream)
+    {
+        dim3 threads(CUDA_WARP_SIZE);
+        // int tmp_blocks = (keypoints_num % CUDA_WARP_SIZE == 0) ? keypoints_num / CUDA_WARP_SIZE : keypoints_num / CUDA_WARP_SIZE + 1;
+        dim3 blocks(calc_block_size(img_width, threads.x));
+        kernel_overlay_canny<<<blocks, threads, 0, stream>>>(dest_image,
+                                                             dest_pitch,
+                                                             src_image,
+                                                             src_pitch,
+                                                             canny_image,
+                                                             canny_pitch,
+                                                             img_width,
+                                                             img_height);
     }
 
     // void match_keypoints(float2 *d_pos_tmp,
@@ -271,27 +321,27 @@ namespace Jetracer
         dim3 threads(CUDA_WARP_SIZE);
         // int tmp_blocks = (keypoints_num % CUDA_WARP_SIZE == 0) ? keypoints_num / CUDA_WARP_SIZE : keypoints_num / CUDA_WARP_SIZE + 1;
         dim3 blocks(calc_block_size(previous_frame->h_valid_keypoints_num, threads.x));
-        kernel_reproject_prev_points<<<blocks, threads, 0, stream>>>(d_pos_tmp,
-                                                                     previous_frame->d_points,
-                                                                     previous_frame->h_valid_keypoints_num,
-                                                                     T_w2c_prev_curr_,
-                                                                     d_rgb_intrin);
+        // kernel_reproject_prev_points<<<blocks, threads, 0, stream>>>(d_pos_tmp,
+        //                                                              previous_frame->d_points,
+        //                                                              previous_frame->h_valid_keypoints_num,
+        //                                                              T_w2c_prev_curr_,
+        //                                                              d_rgb_intrin);
 
-        kernel_match_keypoints<<<blocks, threads, 0, stream>>>(d_pos_tmp,
-                                                               current_frame->d_pos,
-                                                               d_pos_frame,
-                                                               previous_frame->d_descriptors,
-                                                               current_frame->d_descriptors,
-                                                               max_pixel_distance,
-                                                               max_hamming_distance,
-                                                               previous_frame->h_valid_keypoints_num,
-                                                               d_valid_keypoints_num,
-                                                               previous_matched_points,
-                                                               current_matched_points,
-                                                               (double3 *)previous_frame->d_points,
-                                                               (double3 *)current_frame->d_points,
-                                                               previous_frame->keypoints_count,
-                                                               d_keypoints_num_matched);
+        // kernel_match_keypoints<<<blocks, threads, 0, stream>>>(d_pos_tmp,
+        //                                                        current_frame->d_pos,
+        //                                                        d_pos_frame,
+        //                                                        previous_frame->d_descriptors,
+        //                                                        current_frame->d_descriptors,
+        //                                                        max_pixel_distance,
+        //                                                        max_hamming_distance,
+        //                                                        previous_frame->h_valid_keypoints_num,
+        //                                                        d_valid_keypoints_num,
+        //                                                        previous_matched_points,
+        //                                                        current_matched_points,
+        //                                                        (double3 *)previous_frame->d_points,
+        //                                                        (double3 *)current_frame->d_points,
+        //                                                        previous_frame->keypoints_count,
+        //                                                        d_keypoints_num_matched);
 
         // checkCudaErrors(cudaStreamSynchronize(stream)); // to get h_keypoints_num_matched
 

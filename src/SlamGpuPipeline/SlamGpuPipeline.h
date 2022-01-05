@@ -41,7 +41,7 @@ namespace Jetracer
         void process_gyro(rs2_vector gyro_data, double ts);
         void process_accel(rs2_vector accel_data);
 
-        void upload_intristics(std::shared_ptr<Jetracer::rgbd_frame_t> rgbd_frame);
+        void upload_intrinsics(std::shared_ptr<Jetracer::rgbd_frame_t> rgbd_frame);
 
         context_t *_ctx;
         std::mutex m_mutex_subscribers;
@@ -55,14 +55,18 @@ namespace Jetracer
         unsigned long long depth_curr_frame_id = 0;
         unsigned long long rgb_prev_frame_id = 0;
         unsigned long long depth_prev_frame_id = 0;
+        unsigned long long prev_ir_left_frame_id = 0;
 
         bool intristics_are_known = false;
         std::mutex m_gpu_mutex;
 
-        float depth_scale;
-        rs2_intrinsics *_d_rgb_intrinsics;
-        rs2_intrinsics *_d_depth_intrinsics;
-        rs2_extrinsics *_d_depth_rgb_extrinsics;
+        // float depth_scale;
+        // rs2_intrinsics *_d_rgb_intrinsics;
+        // rs2_intrinsics *_d_depth_intrinsics;
+        // rs2_extrinsics *_d_depth_rgb_extrinsics;
+
+        rs2_intrinsics *_d_ir_intristics_left;
+        rs2_intrinsics *_d_ir_intristics_right;
 
         int frame_counter = 0;
 

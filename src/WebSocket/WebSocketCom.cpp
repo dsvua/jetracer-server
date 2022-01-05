@@ -20,7 +20,8 @@ namespace Jetracer
 {
     WebSocketCom::WebSocketCom(const std::string threadName, context_t *ctx) : EventsThread(threadName), _ctx(ctx)
     {
-        auto pushEventCallback = [this](pEvent event) -> bool {
+        auto pushEventCallback = [this](pEvent event) -> bool
+        {
             this->pushEvent(event);
             return true;
         };
@@ -84,7 +85,8 @@ namespace Jetracer
 
     void WebSocketCom::Communication()
     {
-        auto pushEventCallback = [this](pEvent event) -> bool {
+        auto pushEventCallback = [this](pEvent event) -> bool
+        {
             this->pushEvent(event);
             return true;
         };
@@ -170,14 +172,14 @@ namespace Jetracer
             bson_message.add("width", bson_value_type::bson_int32, &_ctx->cam_w);
             bson_message.add("height", bson_value_type::bson_int32, &_ctx->cam_h);
             bson_message.add("channels", bson_value_type::bson_int32, &channels);
-            bson_message.add("keypoints_x",
-                             bson_value_type::bson_binary,
-                             slam_frame->keypoints_x,
-                             slam_frame->h_matched_keypoints_num * sizeof(uint16_t));
-            bson_message.add("keypoints_y",
-                             bson_value_type::bson_binary,
-                             slam_frame->keypoints_y,
-                             slam_frame->h_matched_keypoints_num * sizeof(uint16_t));
+            // bson_message.add("keypoints_x",
+            //                  bson_value_type::bson_binary,
+            //                  slam_frame->keypoints_x,
+            //                  slam_frame->h_matched_keypoints_num * sizeof(uint16_t));
+            // bson_message.add("keypoints_y",
+            //                  bson_value_type::bson_binary,
+            //                  slam_frame->keypoints_y,
+            //                  slam_frame->h_matched_keypoints_num * sizeof(uint16_t));
             bson_message.add("image",
                              bson_value_type::bson_binary,
                              slam_frame->image,

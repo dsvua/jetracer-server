@@ -28,7 +28,8 @@ namespace Jetracer
 
     SlamGpuPipeline::SlamGpuPipeline(const std::string threadName, context_t *ctx) : EventsThread(threadName), _ctx(ctx)
     {
-        auto pushEventCallback = [this](pEvent event) -> bool {
+        auto pushEventCallback = [this](pEvent event) -> bool
+        {
             this->pushEvent(event);
             return true;
         };
@@ -50,14 +51,14 @@ namespace Jetracer
         }
 
         loadPattern(); // loads ORB pattern to GPU
-        checkCudaErrors(cudaMalloc((void **)&_d_rgb_intrinsics, sizeof(rs2_intrinsics)));
-        checkCudaErrors(cudaMalloc((void **)&_d_depth_intrinsics, sizeof(rs2_intrinsics)));
-        checkCudaErrors(cudaMalloc((void **)&_d_depth_rgb_extrinsics, sizeof(rs2_extrinsics)));
+        checkCudaErrors(cudaMalloc((void **)&_d_ir_intristics_left, sizeof(rs2_intrinsics)));
+        checkCudaErrors(cudaMalloc((void **)&_d_ir_intristics_right, sizeof(rs2_intrinsics)));
+        // checkCudaErrors(cudaMalloc((void **)&_d_depth_rgb_extrinsics, sizeof(rs2_extrinsics)));
 
         std::cout << "SlamGpuPipeline is initialized" << std::endl;
     }
 
-    void SlamGpuPipeline::upload_intristics(std::shared_ptr<Jetracer::rgbd_frame_t> rgbd_frame)
+    void SlamGpuPipeline::upload_intrinsics(std::shared_ptr<Jetracer::rgbd_frame_t> rgbd_frame)
     {
         // std::cout << "Uploading intinsics " << std::endl;
 
@@ -68,24 +69,22 @@ namespace Jetracer
         // rs2_intrinsics h_depth_intrinsics = depth_profile.get_intrinsics();
         // rs2_extrinsics h_depth_rgb_extrinsics = depth_profile.get_extrinsics_to(rgb_profile);
 
-        rs2_intrinsics h_rgb_intrinsics = rgbd_frame->rgb_intristics;
-        rs2_intrinsics h_depth_intrinsics = rgbd_frame->depth_intristics;
-        rs2_extrinsics h_depth_rgb_extrinsics = rgbd_frame->extrinsics;
+        // rs2_intrinsics h_rgb_intrinsics = rgbd_frame->rgb_intristics;
+        // rs2_intrinsics h_depth_intrinsics = rgbd_frame->depth_intristics;
+        // rs2_extrinsics h_depth_rgb_extrinsics = rgbd_frame->extrinsics;
 
-        checkCudaErrors(cudaMemcpy((void *)_d_rgb_intrinsics,
-                                   &h_rgb_intrinsics,
+        rs2_intrinsics h_ir_intrinsics_left = rgbd_frame->ir_intristics_left;
+        rs2_intrinsics h_ir_intrinsics_right = rgbd_frame->ir_intristics_right;
+
+        checkCudaErrors(cudaMemcpy((void *)_d_ir_intristics_left,
+                                   &h_ir_intrinsics_left,
                                    sizeof(rs2_intrinsics),
                                    cudaMemcpyHostToDevice));
-        checkCudaErrors(cudaMemcpy((void *)_d_depth_intrinsics,
-                                   &h_depth_intrinsics,
+        checkCudaErrors(cudaMemcpy((void *)_d_ir_intristics_right,
+                                   &h_ir_intrinsics_right,
                                    sizeof(rs2_intrinsics),
                                    cudaMemcpyHostToDevice));
-        checkCudaErrors(cudaMemcpy((void *)_d_depth_rgb_extrinsics,
-                                   &h_depth_rgb_extrinsics,
-                                   sizeof(rs2_extrinsics),
-                                   cudaMemcpyHostToDevice));
-
-        depth_scale = rgbd_frame->depth_scale;
+        // depth_scale = rgbd_frame->depth_scale;
         intristics_are_known = true;
         std::cout << "Uploaded intinsics " << std::endl;
     }
@@ -132,36 +131,34 @@ namespace Jetracer
             // upload intinsics/extrinsics to GPU if not uploaded yet
             if (!intristics_are_known)
             {
-                upload_intristics(rgbd_frame);
+                upload_intrinsics(rgbd_frame);
             }
             else
             {
                 rgb_curr_frame_id = rgbd_frame->rgb_frame_id;
-                depth_curr_frame_id = rgbd_frame->depth_frame_id;
+                // depth_curr_frame_id = rgbd_frame->depth_frame_id;
 
                 // need to check if current frame is not the same as previous
-                // as sometimes librealsens sends the same frames few times
+                // as sometimes librealsense sends the same frames few times
                 if (deleted_slam_frames.size() > 0 &&
-                    frame_counter > _ctx->RealSenseD400_autoexposure_settle_frame &&
-                    rgb_curr_frame_id != rgb_prev_frame_id &&
-                    depth_curr_frame_id != depth_prev_frame_id)
+                    rgbd_frame->ir_frame_id != prev_ir_left_frame_id &&
+                    frame_counter > _ctx->RealSenseD400_autoexposure_settle_frame)
                 {
                     std::lock_guard<std::mutex> lock(m_gpu_mutex);
                     int thread_id = deleted_slam_frames.back();
                     deleted_slam_frames.pop_back();
-                    // m_gpu_mutex.unlock();
 
                     rgbd_frame->theta = theta;
                     slam_frames[thread_id]->rgbd_frame = rgbd_frame;
                     slam_frames[thread_id]->image_ready_for_process = true;
                     slam_frames[thread_id]->thread_cv.notify_one();
                     std::cout << "Notified GPU thread " << thread_id
-                              << " rgb frame id: " << rgb_curr_frame_id
-                              << " depth frame id: " << depth_curr_frame_id
-                              << " GPU queue length: " << _ctx->SlamGpuPipeline_max_streams_length - deleted_slam_frames.size()
+                              << " ir_frame_id: " << rgbd_frame->ir_frame_id
+                              //           << " GPU queue length: " << _ctx->SlamGpuPipeline_max_streams_length - deleted_slam_frames.size()
                               << std::endl;
-                    rgb_prev_frame_id = rgb_curr_frame_id;
-                    depth_prev_frame_id = depth_curr_frame_id;
+                    // rgb_prev_frame_id = rgb_curr_frame_id;
+                    // depth_prev_frame_id = depth_curr_frame_id;
+                    prev_ir_left_frame_id = rgbd_frame->ir_frame_id;
                 }
             }
             frame_counter++;

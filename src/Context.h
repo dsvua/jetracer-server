@@ -26,6 +26,9 @@ namespace Jetracer
         int SlamGpuPipeline_max_streams_length = 1;
         int SlamGpuPipeline_max_keypoints = 1024;
         int SlamGpuPipeline_max_keypoints_to_search = 5120;
+        float min_score = 500.0f;
+        int max_descriptor_distance = 10;
+        float max_points_distance = 10000;
 
         // Fast keypoints
         int pyramid_levels = 1;

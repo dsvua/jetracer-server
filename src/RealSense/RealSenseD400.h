@@ -39,25 +39,28 @@ namespace Jetracer
     {
         // rs2::depth_frame depth_frame = rs2::frame{};
         // rs2::video_frame rgb_frame = rs2::frame{};
-        uint16_t *depth_image;
+        // uint16_t *depth_image;
         unsigned char *rgb_image;
-        unsigned char *ir_image;
+        unsigned char *ir_image_left;
+        unsigned char *ir_image_right;
 
         float3 theta; // gyro and accel computed angles for this frame
 
         double timestamp;
-        unsigned long long depth_frame_id;
+        // unsigned long long depth_frame_id;
         unsigned long long rgb_frame_id;
         unsigned long long ir_frame_id;
 
-        int depth_image_size;
+        // int depth_image_size;
         int rgb_image_size;
         int ir_image_size;
 
-        rs2_intrinsics depth_intristics;
-        rs2_intrinsics rgb_intristics;
-        rs2_extrinsics extrinsics;
-        float depth_scale;
+        // rs2_intrinsics depth_intristics;
+        // rs2_intrinsics rgb_intristics;
+        rs2_intrinsics ir_intristics_left;
+        rs2_intrinsics ir_intristics_right;
+        // rs2_extrinsics extrinsics;
+        // float depth_scale;
 
         // float depth_scale;
 
@@ -68,12 +71,14 @@ namespace Jetracer
 
         ~rgbd_frame()
         {
-            if (depth_image)
-                free(depth_image);
+            // if (depth_image)
+            //     free(depth_image);
             if (rgb_image)
                 free(rgb_image);
-            if (ir_image)
-                free(ir_image);
+            if (ir_image_left)
+                free(ir_image_left);
+            if (ir_image_right)
+                free(ir_image_right);
         }
 
     } rgbd_frame_t;

@@ -147,7 +147,6 @@ namespace Jetracer
         return (d_corner_lut[dark_diff_address] || d_corner_lut[bright_diff_address]);
     }
 
-    template <fast_score SCORE>
     __global__ void fast_gpu_calc_corner_response_kernel(
         const int image_width,
         const int image_height,
@@ -230,57 +229,16 @@ namespace Jetracer
                     * a corner. This policy gave better results than computing the score
                     * for every pixel
                     */
-                    if (SCORE == SUM_OF_ABS_DIFF_ALL)
-                    {
-                        float response = 0.0f;
+                    float response_bright = 0.0f;
+                    float response_dark = 0.0f;
 #pragma unroll 16
-                        for (int i = 0; i < 16; ++i)
-                        {
-                            response += fabsf(px[i] - c);
-                        }
-                        d_response[resp_offset] = response;
-                    }
-                    else if (SCORE == SUM_OF_ABS_DIFF_ON_ARC)
+                    for (int i = 0; i < 16; ++i)
                     {
-                        float response_bright = 0.0f;
-                        float response_dark = 0.0f;
-#pragma unroll 16
-                        for (int i = 0; i < 16; ++i)
-                        {
-                            float absdiff = fabsf(px[i] - c) - threshold;
-                            response_dark += (dark_diff_address & (1 << i)) ? absdiff : 0.0f;
-                            response_bright += (bright_diff_address & (1 << i)) ? absdiff : 0.0f;
-                        }
-                        d_response[resp_offset] = fmaxf(response_bright, response_dark);
+                        float absdiff = fabsf(px[i] - c) - threshold;
+                        response_dark += (dark_diff_address & (1 << i)) ? absdiff : 0.0f;
+                        response_bright += (bright_diff_address & (1 << i)) ? absdiff : 0.0f;
                     }
-                    else if (SCORE == MAX_THRESHOLD)
-                    {
-                        // Binary search for the maximum threshold value with which the given
-                        // point is still a corner
-                        float min_thr = threshold + 1;
-                        float max_thr = 255.0f;
-                        while (min_thr <= max_thr)
-                        {
-                            float med_thr = floorf((min_thr + max_thr) * 0.5f);
-                            // try out med_thr as a new threshold
-                            if (fast_gpu_is_corner_quick(d_corner_lut,
-                                                         px,
-                                                         c,
-                                                         med_thr,
-                                                         dark_diff_address,
-                                                         bright_diff_address))
-                            {
-                                // still a corner
-                                min_thr = med_thr + 1.0f;
-                            }
-                            else
-                            {
-                                // not a corner anymore
-                                max_thr = med_thr - 1.0f;
-                            }
-                        }
-                        d_response[resp_offset] = max_thr;
-                    }
+                    d_response[resp_offset] = fmaxf(response_bright, response_dark);
                 }
             }
         }
@@ -322,10 +280,7 @@ namespace Jetracer
         dim3 blocks((image_width + threads.x - 1) / threads.x,
                     (image_height + threads.y - 1) / threads.y);
 
-        switch (score)
-        {
-        case SUM_OF_ABS_DIFF_ALL:
-            fast_gpu_calc_corner_response_kernel<SUM_OF_ABS_DIFF_ALL><<<blocks, threads, 0, stream>>>(
+        fast_gpu_calc_corner_response_kernel<<<blocks, threads, 0, stream>>>(
                 image_width,
                 image_height,
                 image_pitch,
@@ -337,36 +292,6 @@ namespace Jetracer
                 min_arc_length,
                 response_pitch_elements,
                 d_response);
-            break;
-        case SUM_OF_ABS_DIFF_ON_ARC:
-            fast_gpu_calc_corner_response_kernel<SUM_OF_ABS_DIFF_ON_ARC><<<blocks, threads, 0, stream>>>(
-                image_width,
-                image_height,
-                image_pitch,
-                d_image,
-                horizontal_border,
-                vertical_border,
-                d_corner_lut,
-                threshold,
-                min_arc_length,
-                response_pitch_elements,
-                d_response);
-            break;
-        case MAX_THRESHOLD:
-            fast_gpu_calc_corner_response_kernel<MAX_THRESHOLD><<<blocks, threads, 0, stream>>>(
-                image_width,
-                image_height,
-                image_pitch,
-                d_image,
-                horizontal_border,
-                vertical_border,
-                d_corner_lut,
-                threshold,
-                min_arc_length,
-                response_pitch_elements,
-                d_response);
-            break;
-        }
         // checkCudaErrors(cudaStreamSynchronize(stream));
 
     }

@@ -129,7 +129,7 @@ namespace Jetracer
             * If it is higher, than we set our current value to zero.
             * We DO NOT write to the response buffer, we keep everything in registers. Also,
             * we do not use if-else for checking values, we use my signbit trick. This latter is amazing, because
-            * it completely avoids warp divergence.
+            * it completely avoids warp divergence.int local_idx = 0;
             * Then once all threads in a warp figured out whether the value they are looking at was supressed
             * or not, they reduce with warp-level intrinsics to lane 0.
             */

@@ -49,6 +49,7 @@ namespace Jetracer
                                  const rs2_intrinsics *d_rgb_intrin,
                                  int image_width,
                                  int image_height,
+                                 float min_score,
                                  float2 *d_pos_out,
                                  float2 *d_pos_in,
                                  float *d_score,

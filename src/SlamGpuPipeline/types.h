@@ -31,9 +31,12 @@ namespace Jetracer
         std::shared_ptr<double[]> h_points;
         std::shared_ptr<uint32_t[]> h_descriptors;
 
-        float2 *d_pos;
-        double *d_points;
-        uint32_t *d_descriptors;
+        float2 *d_pos_left;
+        double *d_points_left;
+        uint32_t *d_descriptors_left;
+        float2 *d_pos_right;
+        double *d_points_right;
+        uint32_t *d_descriptors_right;
 
         int keypoints_count;
         int h_valid_keypoints_num;
@@ -52,12 +55,18 @@ namespace Jetracer
                 free(keypoints_x);
             if (keypoints_y)
                 free(keypoints_y);
-            if (d_pos)
-                checkCudaErrors(cudaFree(d_pos));
-            if (d_points)
-                checkCudaErrors(cudaFree(d_points));
-            if (d_descriptors)
-                checkCudaErrors(cudaFree(d_descriptors));
+            if (d_pos_left)
+                checkCudaErrors(cudaFree(d_pos_left));
+            if (d_points_left)
+                checkCudaErrors(cudaFree(d_points_left));
+            if (d_descriptors_left)
+                checkCudaErrors(cudaFree(d_descriptors_left));
+            if (d_pos_right)
+                checkCudaErrors(cudaFree(d_pos_right));
+            if (d_points_right)
+                checkCudaErrors(cudaFree(d_points_right));
+            if (d_descriptors_right)
+                checkCudaErrors(cudaFree(d_descriptors_right));
             // T_c2w.~MatrixBase();
             // T_w2c.~MatrixBase();
         }

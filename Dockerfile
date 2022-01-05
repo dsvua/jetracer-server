@@ -87,12 +87,12 @@ ENV NVIDIA_VISIBLE_DEVICES all
 ENV NVIDIA_DRIVER_CAPABILITIES graphics,utility,compute
 
 # Install opencv
-# RUN apt-get update && \
-#     apt-get install -y libopencv-dev \
-#     libopencv-core-dev \
-#     libopencv-calib3d-dev \
-#     libopencv-features2d-dev \
-#     libopencv-imgcodecs-dev \
-#     libopencv-imgproc-dev && \
-#     rm -rf /var/lib/apt/lists/*
+RUN apt-get update && \
+    apt-get install -y libopencv-dev \
+    libopencv-core-dev \
+    libopencv-calib3d-dev \
+    libopencv-features2d-dev \
+    libopencv-imgcodecs-dev \
+    libopencv-imgproc-dev && \
+    rm -rf /var/lib/apt/lists/*
 

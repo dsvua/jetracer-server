@@ -18,10 +18,21 @@ namespace Jetracer
     void overlay_keypoints(unsigned char *d_image,
                            std::size_t pitch,
                            float2 *d_pos,
-                           unsigned int *d_aligned_depth,
-                           int keypoints_num,
+                           float *d_score,
+                           float min_score,
                            const rs2_intrinsics *d_rgb_intrin,
+                           int keypoints_num,
                            cudaStream_t stream);
+
+    void overlay_canny(unsigned char *dest_image,
+                       std::size_t dest_pitch,
+                       unsigned char *src_image,
+                       std::size_t src_pitch,
+                       unsigned char *canny_image,
+                       std::size_t canny_pitch,
+                       int img_width,
+                       int img_height,
+                       cudaStream_t stream);
 
     // void match_keypoints(float2 *d_pos_tmp,
     //                      double *d_pos,

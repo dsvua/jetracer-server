@@ -37,7 +37,8 @@ namespace Jetracer
 
     SaveRawData::SaveRawData(const std::string threadName, context_t *ctx) : EventsThread(threadName), _ctx(ctx)
     {
-        auto pushEventCallback = [this](pEvent event) -> bool {
+        auto pushEventCallback = [this](pEvent event) -> bool
+        {
             this->pushEvent(event);
             return true;
         };
@@ -128,13 +129,11 @@ namespace Jetracer
             image_file.write(image_buffer, _ctx->cam_w * _ctx->cam_h * 3);
             image_file.close();
 
-            filename = _ctx->images_path + "depth_" + std::to_string(rgbd_frame->timestamp) + ".bin";
-            // std::cout << "Saving file " << filename << " size " << std::to_string(rgbd_frame->depth_size) << std::endl;
-            std::ofstream depth_file(filename, std::ofstream::binary);
-            // const char *depth_buffer = static_cast<const char *>(rgbd_frame->depth_image);
-            char *depth_buffer = (char *)(rgbd_frame->depth_image);
-            depth_file.write(depth_buffer, _ctx->cam_w * _ctx->cam_h * 2);
-            depth_file.close();
+            // filename = _ctx->images_path + "depth_" + std::to_string(rgbd_frame->timestamp) + ".bin";
+            // std::ofstream depth_file(filename, std::ofstream::binary);
+            // char *depth_buffer = (char *)(rgbd_frame->depth_image);
+            // depth_file.write(depth_buffer, _ctx->cam_w * _ctx->cam_h * 2);
+            // depth_file.close();
 
             break;
         }

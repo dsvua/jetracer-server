@@ -31,13 +31,13 @@ link_directories(${CMAKE_CUDA_INCLUDE_DIRS})
 find_library(NVJPEG_LIBRARY nvjpeg ${CMAKE_CUDA_IMPLICIT_LINK_DIRECTORIES})
 find_library(ASIO_LIBRARY asio)
 find_library(WEBSOCKETPP_LIBRARY websocketpp)
-# find_library(NPPIG_LIBRARY nppig ${CMAKE_CUDA_IMPLICIT_LINK_DIRECTORIES})
-# find_library(NPPC_LIBRARY nppc ${CMAKE_CUDA_IMPLICIT_LINK_DIRECTORIES})
+find_library(NPPIF_LIBRARY nppif ${CMAKE_CUDA_IMPLICIT_LINK_DIRECTORIES})
+find_library(NPPC_LIBRARY nppc ${CMAKE_CUDA_IMPLICIT_LINK_DIRECTORIES})
 # find_library(CULIBOS culibos ${CMAKE_CUDA_IMPLICIT_LINK_DIRECTORIES})
 
 find_package(realsense2 2.29.0 REQUIRED)
 find_package(Eigen3 REQUIRED)
-# find_package(OpenCV REQUIRED)
+find_package(OpenCV REQUIRED)
 
 # ---[ Use the default installation path if not set.
 IF(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
