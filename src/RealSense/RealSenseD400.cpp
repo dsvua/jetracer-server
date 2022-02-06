@@ -189,7 +189,7 @@ namespace Jetracer
 
         // disabling laser
         rs2::device selected_device = selection.get_device();
-        // auto depth_sensor = selected_device.first<rs2::depth_sensor>();
+        auto depth_sensor = selected_device.first<rs2::depth_sensor>();
         auto color_sensor = selected_device.first<rs2::color_sensor>();
 
         // auto advanced_mode_depth = depth_sensor.as<rs400::advanced_mode>();
@@ -205,7 +205,7 @@ namespace Jetracer
         color_sensor.set_option(RS2_OPTION_ENABLE_AUTO_EXPOSURE, 1);
         color_sensor.set_option(RS2_OPTION_AUTO_EXPOSURE_PRIORITY, 0);
 
-        // depth_sensor.set_option(RS2_OPTION_EMITTER_ENABLED, 0.f); // Disable emitter/laser
+        depth_sensor.set_option(RS2_OPTION_EMITTER_ENABLED, 0.f); // Disable emitter/laser
         // day
         // depth_sensor.set_option(RS2_OPTION_EXPOSURE, 5715.f);     // Change exposure for D455
         // depth_sensor.set_option(RS2_OPTION_GAIN, 41.f);           // Change gain for D455

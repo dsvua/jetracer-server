@@ -126,6 +126,8 @@ namespace Jetracer
                                                                keypoints_num_left,
                                                                keypoints_num_right,
                                                                d_keypoints_num_matched);
+                                                               
+        // checkCudaErrors(cudaStreamSynchronize(stream));
 
         checkCudaErrors(cudaMemcpyAsync((void *)h_keypoints_num_matched,
                                                 d_keypoints_num_matched,

@@ -152,10 +152,10 @@ namespace Jetracer
                     slam_frames[thread_id]->rgbd_frame = rgbd_frame;
                     slam_frames[thread_id]->image_ready_for_process = true;
                     slam_frames[thread_id]->thread_cv.notify_one();
-                    std::cout << "Notified GPU thread " << thread_id
-                              << " ir_frame_id: " << rgbd_frame->ir_frame_id
-                              //           << " GPU queue length: " << _ctx->SlamGpuPipeline_max_streams_length - deleted_slam_frames.size()
-                              << std::endl;
+                    // std::cout << "Notified GPU thread " << thread_id
+                    //           << " ir_frame_id: " << rgbd_frame->ir_frame_id
+                    // << " GPU queue length: " << _ctx->SlamGpuPipeline_max_streams_length - deleted_slam_frames.size()
+                    //   << std::endl;
                     // rgb_prev_frame_id = rgb_curr_frame_id;
                     // depth_prev_frame_id = depth_curr_frame_id;
                     prev_ir_left_frame_id = rgbd_frame->ir_frame_id;

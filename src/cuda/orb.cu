@@ -3,6 +3,7 @@
 
 #include <vector>
 #include <helper_cuda.h>
+#include <cstdio> // for printf
 
 namespace Jetracer
 {
@@ -83,12 +84,18 @@ namespace Jetracer
                                               int keypoints_num)
     {
         int idx = blockIdx.x;
-        int k_x = floor(d_keypoints_pos[idx].x + 0.5);
-        int k_y = floor(d_keypoints_pos[idx].y + 0.5);
+        int k_x = floorf(d_keypoints_pos[idx].x + 0.5);
+        int k_y = floorf(d_keypoints_pos[idx].y + 0.5);
         // Hardcoding for patch 31x31, so, radius is 15
         int r2 = 15 * 15;
         float m10 = 0;
         float m01 = 0;
+
+        // if (k_x < 0 || k_x > image_width || k_y < 0 || k_y > image_height)
+        // {
+        //     printf("idx %d x: %d y: %d", idx, k_x, k_y);
+        //     // return;
+        // };
 
         // Hardcoding for patch 31x31, so, radius is 15
         if (threadIdx.x < 31)

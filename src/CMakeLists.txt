@@ -6,8 +6,10 @@ ADD_LIBRARY(${PROJECT_NAME}_library
     MainEventsLoop.cpp
     PingPong/PingPong.cpp
     RealSense/RealSenseD400.cpp
+    WebSocket/FoxgloveWebSocketCom.cpp
     WebSocket/WebSocketCom.cpp
     WebSocket/bson.cpp
+    # foxglove/websocket/server.hpp
 )
 
 ADD_LIBRARY(${PROJECT_NAME}_library_gpu
@@ -34,7 +36,7 @@ ADD_EXECUTABLE(${PROJECT_NAME} main.cpp)
 SET_TARGET_PROPERTIES(${PROJECT_NAME} PROPERTIES POSITION_INDEPENDENT_CODE ON)
 SET_TARGET_PROPERTIES(${PROJECT_NAME} PROPERTIES CUDA_SEPARABLE_COMPILATION ON)
 TARGET_INCLUDE_DIRECTORIES(${PROJECT_NAME} PRIVATE ${CMAKE_CUDA_TOOLKIT_INCLUDE_DIRECTORIES})
-TARGET_LINK_LIBRARIES(${PROJECT_NAME} PUBLIC ${PROJECT_NAME}_library ${PROJECT_NAME}_library_gpu ${OpenCV_LIBS} ${realsense2_LIBRARY} -pthread)
+TARGET_LINK_LIBRARIES(${PROJECT_NAME} PUBLIC ${PROJECT_NAME}_library ${PROJECT_NAME}_library_gpu ${OpenCV_LIBS} ${realsense2_LIBRARY} nlohmann_json::nlohmann_json -pthread)
 # TARGET_LINK_LIBRARIES(${PROJECT_NAME} PUBLIC ${PROJECT_NAME}_library ${PROJECT_NAME}_library_gpu Eigen3::Eigen ${realsense2_LIBRARY} ${OpenCV_LIBS} ${CUDART_LIBRARY} ${CUDADEVRT_LIBRARY} -pthread)
 
 TARGET_LINK_LIBRARIES(${PROJECT_NAME}_library PUBLIC ${realsense2_LIBRARY} -pthread)

@@ -85,11 +85,11 @@ namespace Jetracer
 
     void WebSocketCom::Communication()
     {
-        auto pushEventCallback = [this](pEvent event) -> bool
-        {
-            this->pushEvent(event);
-            return true;
-        };
+        // auto pushEventCallback = [this](pEvent event) -> bool
+        // {
+        //     this->pushEvent(event);
+        //     return true;
+        // };
 
         using websocketpp::lib::bind;
         using websocketpp::lib::placeholders::_1;

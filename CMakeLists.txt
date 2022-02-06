@@ -39,6 +39,8 @@ find_package(realsense2 2.29.0 REQUIRED)
 find_package(Eigen3 REQUIRED)
 find_package(OpenCV REQUIRED)
 
+find_package(nlohmann_json 3.2.0 REQUIRED)
+
 # ---[ Use the default installation path if not set.
 IF(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
     SET(CMAKE_INSTALL_PREFIX ${CMAKE_BINARY_DIR} CACHE PATH "" FORCE)
@@ -50,7 +52,7 @@ IF(NOT CMAKE_BUILD_TYPE)
 ENDIF(NOT CMAKE_BUILD_TYPE)
 
 
-
+add_definitions(-DASIO_STANDALONE)
 
 #ds set sources
 message("${PROJECT_NAME}|final flags: '${CMAKE_CXX_FLAGS}'")

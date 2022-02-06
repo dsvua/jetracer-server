@@ -2,7 +2,8 @@
 #include "PingPong/PingPong.h"
 #include "RealSense/RealSenseD400.h"
 #include "RealSense/SaveRawData.h"
-#include "WebSocket/WebSocketCom.h"
+// #include "WebSocket/WebSocketCom.h"
+#include "WebSocket/FoxgloveWebSocketCom.h"
 #include "SlamGpuPipeline/SlamGpuPipeline.h"
 
 #include <iostream>
@@ -16,20 +17,23 @@ namespace Jetracer
     MainEventsLoop::MainEventsLoop(const std::string threadName, context_t *ctx) : EventsThread(threadName), _ctx(ctx)
     {
         // pushing callbacks
-        _ctx->sendEvent = [this](pEvent event) -> bool {
+        _ctx->sendEvent = [this](pEvent event) -> bool
+        {
             this->pushEvent(event);
             return true;
         };
 
         _ctx->subscribeForEvent = [this](EventType _event_type,
                                          std::string _thread_name,
-                                         std::function<bool(pEvent)> _pushEventCallback) -> bool {
+                                         std::function<bool(pEvent)> _pushEventCallback) -> bool
+        {
             this->subscribeForEvent(_event_type, _thread_name, _pushEventCallback);
             return true;
         };
 
         _ctx->unSubscribeFromEvent = [this](EventType _event_type,
-                                            std::string _thread_name) -> bool {
+                                            std::string _thread_name) -> bool
+        {
             this->unSubscribeFromEvent(_event_type, _thread_name);
             return true;
         };
@@ -49,8 +53,13 @@ namespace Jetracer
         // _started_threads.back()->setMaxQueueLength(_ctx->SaveRawData_max_queue_legth);
         // _started_threads.back()->createThread();
 
-        // std::cout << "Starting WebSocket" << std::endl;
-        _started_threads.push_back(new Jetracer::WebSocketCom("WebSocketCom", _ctx));
+        // // std::cout << "Starting WebSocket" << std::endl;
+        // _started_threads.push_back(new Jetracer::WebSocketCom("WebSocketCom", _ctx));
+        // _started_threads.back()->setMaxQueueLength(_ctx->WebSocketCom_max_queue_legth);
+        // _started_threads.back()->createThread();
+
+        // std::cout << "Starting FoxgloveWebSocket" << std::endl;
+        _started_threads.push_back(new Jetracer::FoxgloveWebSocketCom("FoxgloveWebSocketCom", _ctx));
         _started_threads.back()->setMaxQueueLength(_ctx->WebSocketCom_max_queue_legth);
         _started_threads.back()->createThread();
 

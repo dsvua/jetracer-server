@@ -67,6 +67,9 @@ namespace Jetracer
         float new_keyframe_angle = 0.003f;    // radians turn for new keyframe
         float new_keyframe_distance = 300.0f; // distance in mm for new keyframe
 
+        // WebSockets
+        int websocket_server_port = 8765;
+        std::string websocket_server_name = "example server";
     } context_t;
 
 } // namespace Jetracer

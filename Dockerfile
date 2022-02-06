@@ -30,6 +30,7 @@ RUN ln -fs /usr/share/zoneinfo/America/New_York /etc/localtime && \
     git \
     lsof \
     software-properties-common \
+    nlohmann-json3-dev \
     valgrind && \
     rm -rf /var/lib/apt/lists/*
 
@@ -96,3 +97,6 @@ RUN apt-get update && \
     libopencv-imgproc-dev && \
     rm -rf /var/lib/apt/lists/*
 
+# RUN apt-get update && \
+#     apt-get install -y nlohmann-json3-dev && \
+#     rm -rf /var/lib/apt/lists/*

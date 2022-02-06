@@ -15,6 +15,7 @@
 #include <cuda_runtime.h>
 #include <helper_cuda.h>
 #include <eigen3/Eigen/Eigen>
+#include "../cuda/pyramid.cuh"
 
 #include "../RealSense/RealSenseD400.h"
 
@@ -38,6 +39,7 @@ namespace Jetracer
     private:
         void handleEvent(pEvent event);
         void buildStream(int slam_frames_id);
+        void detect_keypoints();
         void process_gyro(rs2_vector gyro_data, double ts);
         void process_accel(rs2_vector accel_data);
 
@@ -79,6 +81,38 @@ namespace Jetracer
         bool firstAccel = true;
         // Keeps the arrival time of previous gyro frame
         double last_ts_gyro = 0;
+
+        // allocate memory for image processing
+        unsigned char *d_rgb_image_;
+        unsigned char *d_gray_image_;
+        unsigned char *d_nvjpeg_rgb_image_;
+
+        std::size_t rgb_pitch_;
+        std::size_t gray_pitch_;
+        std::size_t nvjpeg_rgb_pitch_;
+
+        cudaStream_t stream_left_;
+        cudaStream_t stream_right_;
+        cudaStream_t nvjpeg_stream_;
+
+        std::vector<pyramid_t> pyramid_left_;
+        std::vector<pyramid_t> pyramid_right_;
+
+        float *d_keypoints_angle_left_;
+        float *d_keypoints_angle_right_;
+
+        unsigned char *d_descriptors_tmp_left_;
+        unsigned char *d_descriptors_tmp_right_;
+        int *d_valid_keypoints_num_left;
+        int *d_matched_keypoints_num;
+        int h_matched_keypoints_num = 0;
+
+        float *d_score_left_;
+        float *d_score_right_;
+        int *d_level_left_;
+        int *d_level_right_;
+
+        cudaEvent_t event_ir_right_detected_;
     };
 } // namespace Jetracer
 

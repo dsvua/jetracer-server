@@ -243,6 +243,9 @@ namespace Jetracer
                                                                  min_score,
                                                                  d_rgb_intrin,
                                                                  keypoints_num);
+
+        // checkCudaErrors(cudaStreamSynchronize(stream)); // to get h_keypoints_num_matched
+
     }
 
     void overlay_canny(unsigned char *dest_image,
@@ -362,23 +365,23 @@ namespace Jetracer
                                         sizeof(int),
                                         cudaMemcpyDeviceToHost,
                                         stream));
-        checkCudaErrors(cudaStreamSynchronize(stream)); // to get h_keypoints_num_matched
+        // checkCudaErrors(cudaStreamSynchronize(stream)); // to get h_keypoints_num_matched
 
-        current_frame->keypoints_x = (uint16_t *)malloc(sizeof(uint16_t) * (*h_keypoints_num_matched));
-        current_frame->keypoints_y = (uint16_t *)malloc(sizeof(uint16_t) * (*h_keypoints_num_matched));
+        // current_frame->keypoints_x = (uint16_t *)malloc(sizeof(uint16_t) * (*h_keypoints_num_matched));
+        // current_frame->keypoints_y = (uint16_t *)malloc(sizeof(uint16_t) * (*h_keypoints_num_matched));
 
-        checkCudaErrors(cudaMemcpyAsync((void *)current_frame->keypoints_x,
-                                        d_pos_frame,
-                                        sizeof(uint16_t) * (*h_keypoints_num_matched),
-                                        cudaMemcpyDeviceToHost,
-                                        stream));
+        // checkCudaErrors(cudaMemcpyAsync((void *)current_frame->keypoints_x,
+        //                                 d_pos_frame,
+        //                                 sizeof(uint16_t) * (*h_keypoints_num_matched),
+        //                                 cudaMemcpyDeviceToHost,
+        //                                 stream));
 
-        checkCudaErrors(cudaMemcpyAsync((void *)current_frame->keypoints_y,
-                                        d_pos_frame + previous_frame->keypoints_count,
-                                        sizeof(uint16_t) * (*h_keypoints_num_matched),
-                                        cudaMemcpyDeviceToHost,
-                                        stream));
-        checkCudaErrors(cudaStreamSynchronize(stream)); // to get h_keypoints_num_matched
+        // checkCudaErrors(cudaMemcpyAsync((void *)current_frame->keypoints_y,
+        //                                 d_pos_frame + previous_frame->keypoints_count,
+        //                                 sizeof(uint16_t) * (*h_keypoints_num_matched),
+        //                                 cudaMemcpyDeviceToHost,
+        //                                 stream));
+        // checkCudaErrors(cudaStreamSynchronize(stream)); // to get h_keypoints_num_matched
 
         std::cout << "h_keypoints_num_matched " << *h_keypoints_num_matched << std::endl;
 
